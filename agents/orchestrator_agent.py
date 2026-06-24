@@ -10,9 +10,8 @@ from models import (
     TrendAgentInput,
     WriterAgentInput,
     SafetyAgentInput,
-    ApprovalRecommendation
+    ApprovalRecommendation,
 )
-
 
 from agents.trend_agent import TrendAgent
 from agents.writer_agent import WriterAgent
@@ -26,7 +25,7 @@ class OrchestratorAgent:
     NAME: ClassVar[str] = "orchestrator_agent"
 
     DESCRIPTION: ClassVar[str] = (
-        "Coordinates Trend, Writer, and Safety agents."
+        "Coordinates Trend, Writer, Safety, and Scheduler agents."
     )
 
     INSTRUCTION: ClassVar[str] = """
@@ -38,7 +37,8 @@ Responsibilities:
 2. Execute Trend Agent
 3. Execute Writer Agent
 4. Execute Safety Agent
-5. Return combined result
+5. Execute Scheduler Agent (if approved)
+6. Return combined result
 """
 
     DEFAULT_MODEL: ClassVar[str] = "gemini-2.0-flash"
@@ -54,6 +54,7 @@ Responsibilities:
         input_data: OrchestratorInput,
     ) -> OrchestratorOutput:
 
+        # Trend Agent
         trend_output = self.trend_agent.run(
             TrendAgentInput(
                 user_topic=input_data.user_topic,
@@ -61,6 +62,7 @@ Responsibilities:
             )
         )
 
+        # Writer Agent
         writer_output = self.writer_agent.run(
             WriterAgentInput(
                 user_topic=input_data.user_topic,
@@ -71,6 +73,7 @@ Responsibilities:
             )
         )
 
+        # Safety Agent
         safety_output = self.safety_agent.run(
             SafetyAgentInput(
                 post_content=writer_output.post_content,
@@ -78,6 +81,7 @@ Responsibilities:
             )
         )
 
+        # Scheduler Agent
         schedule_output = None
 
         if (
@@ -87,11 +91,10 @@ Responsibilities:
             schedule_output = self.scheduler_agent.run(
                 post_title=input_data.user_topic
             )
-            print("\nScheduling Post...")
-            print(schedule_output)
 
         return OrchestratorOutput(
             trend_output=trend_output,
             writer_output=writer_output,
             safety_output=safety_output,
+            schedule_output=schedule_output,
         )

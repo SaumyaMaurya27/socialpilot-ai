@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
+from typing import Optional, Any
 
 from pydantic import BaseModel, Field
 
@@ -121,13 +121,5 @@ class OrchestratorOutput(BaseModel):
     trend_output: TrendAgentOutput
     writer_output: WriterAgentOutput
     safety_output: SafetyAgentOutput
+    schedule_output: Optional[dict] = None
 
-class OrchestratorInput(BaseModel):
-    user_topic: str
-    platform: str = "linkedin"
-
-
-class OrchestratorOutput(BaseModel):
-    trend_output: TrendAgentOutput
-    writer_output: WriterAgentOutput
-    safety_output: SafetyAgentOutput
