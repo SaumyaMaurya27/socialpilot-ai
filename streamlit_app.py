@@ -138,6 +138,27 @@ if st.button("Generate Content"):
         st.info(result.writer_output.call_to_action)
 
     # ==========================
+    # Trend Agent (LAST)
+    # ==========================
+    with st.expander("🔥 Trend Agent Output"):
+
+        st.write("### Hashtags")
+
+        for tag in result.trend_output.hashtags:
+            st.markdown(f"✅ {tag}")
+
+        st.write("### Trends")
+
+        for trend in result.trend_output.trends:
+            st.markdown(f"📈 {trend}")
+
+        st.write("### Audience Keywords")
+
+        for keyword in result.trend_output.audience_keywords:
+            st.markdown(f"🎯 {keyword}")
+
+
+    # ==========================
     # Safety Agent
     # ==========================
     with st.expander("🛡️ Safety Agent Output", expanded=True):
@@ -194,22 +215,4 @@ if st.button("Generate Content"):
         else:
             st.warning("Post was not scheduled")
 
-    # ==========================
-    # Trend Agent (LAST)
-    # ==========================
-    with st.expander("🔥 Trend Agent Output"):
-
-        st.write("### Hashtags")
-
-        for tag in result.trend_output.hashtags:
-            st.markdown(f"✅ {tag}")
-
-        st.write("### Trends")
-
-        for trend in result.trend_output.trends:
-            st.markdown(f"📈 {trend}")
-
-        st.write("### Audience Keywords")
-
-        for keyword in result.trend_output.audience_keywords:
-            st.markdown(f"🎯 {keyword}")
+   
