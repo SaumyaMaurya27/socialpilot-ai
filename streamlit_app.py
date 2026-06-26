@@ -120,6 +120,8 @@ if st.button("Generate Content"):
         result = orchestrator.run(
             OrchestratorInput(
                 user_topic=topic,
+                goal=goal,
+                tone=tone,
                 platform=platform.lower(),
             )
         )

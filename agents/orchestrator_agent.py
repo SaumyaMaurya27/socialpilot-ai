@@ -66,6 +66,8 @@ Responsibilities:
         writer_output = self.writer_agent.run(
             WriterAgentInput(
                 user_topic=input_data.user_topic,
+                goal=input_data.goal,
+                tone=input_data.tone,
                 hashtags=trend_output.hashtags,
                 trends=trend_output.trends,
                 audience_keywords=trend_output.audience_keywords,

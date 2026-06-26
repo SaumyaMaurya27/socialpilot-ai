@@ -61,6 +61,14 @@ class WriterAgentInput(BaseModel):
         ...,
         description="The original user topic or announcement.",
     )
+    goal: str = Field(
+        ...,
+        description="The goal of the post.",
+    )
+    tone: str = Field(
+        ...,
+        description="The tone of the post.",
+    )
     hashtags: list[str] = Field(
         default_factory=list,
         description="Hashtags from the Trend Agent.",
@@ -114,6 +122,8 @@ class SafetyAgentOutput(BaseModel):
 
 class OrchestratorInput(BaseModel):
     user_topic: str
+    goal: str
+    tone: str
     platform: str = "linkedin"
 
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import ClassVar
 
 from models import WriterAgentInput, WriterAgentOutput
+from prompts.writer_prompt import build_writer_prompt
+from utils.gemini_client import GeminiClient
 
 
 class WriterAgent:
@@ -18,34 +20,51 @@ class WriterAgent:
 
     def __init__(self, model: str | None = None) -> None:
         self.model = model or self.DEFAULT_MODEL
+        self.gemini = GeminiClient()
 
     def run(
         self,
         input_data: WriterAgentInput,
     ) -> WriterAgentOutput:
 
-        platform = input_data.platform.lower()
+        try:
+            prompt = build_writer_prompt(input_data)
 
-        if platform == "linkedin":
-            post = self._generate_linkedin_post(input_data)
+            # remove it later after development
+            print("*" * 60)
+            print("*" * 60)
+            print(prompt)
+            print("*" * 60)
+            print("*" * 60)
+            # until here
 
-        elif platform == "x":
-            post = self._generate_x_post(input_data)
+            generated_content = self.gemini.generate(prompt)
+            if not generated_content:
+                raise ValueError("Gemini returned empty response.")
 
-        elif platform == "instagram":
-            post = self._generate_instagram_post(input_data)
+        except Exception as e:
 
-        elif platform == "youtube":
-            post = self._generate_youtube_content(input_data)
+            print(f"Gemini Error: {e}")
+            platform = input_data.platform.lower()
 
-        else:
-            post = self._generate_generic_post(input_data)
+            if platform == "linkedin":
+                generated_content = self._generate_linkedin_post(input_data)
 
-        call_to_action = self._generate_cta(input_data)
+            elif platform == "x":
+                generated_content = self._generate_x_post(input_data)
+
+            elif platform == "instagram":
+                generated_content = self._generate_instagram_post(input_data)
+
+            elif platform == "youtube":
+                generated_content = self._generate_youtube_content(input_data)
+
+            else:
+                generated_content = self._generate_generic_post(input_data)
 
         return WriterAgentOutput(
-            post_content=post,
-            call_to_action=call_to_action,
+            post_content=generated_content,
+            call_to_action=self._generate_cta(input_data),
         )
 
     def _generate_linkedin_post(
