@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import ClassVar
 
 from models import WriterAgentInput, WriterAgentOutput
@@ -31,16 +32,37 @@ class WriterAgent:
             prompt = build_writer_prompt(input_data)
 
             # remove it later after development
-            print("*" * 60)
-            print("*" * 60)
-            print(prompt)
-            print("*" * 60)
-            print("*" * 60)
+            try:
+                print("*" * 60)
+                print("*" * 60)
+                print(prompt)
+                print("*" * 60)
+                print("*" * 60)
+            except Exception:
+                pass
             # until here
 
             generated_content = self.gemini.generate(prompt)
             if not generated_content:
                 raise ValueError("Gemini returned empty response.")
+
+            # Parse JSON
+            clean_content = generated_content.strip()
+            if clean_content.startswith("```json"):
+                clean_content = clean_content[7:]
+            elif clean_content.startswith("```"):
+                clean_content = clean_content[3:]
+            if clean_content.endswith("```"):
+                clean_content = clean_content[:-3]
+            clean_content = clean_content.strip()
+
+            data = json.loads(clean_content)
+            version_a = data["version_a"]
+            version_b = data["version_b"]
+            version_c = data["version_c"]
+
+            variations = [version_a, version_b, version_c]
+            post_content = version_a
 
         except Exception as e:
 
@@ -62,8 +84,16 @@ class WriterAgent:
             else:
                 generated_content = self._generate_generic_post(input_data)
 
+            post_content = generated_content
+            variations = [
+                post_content,
+                post_content,
+                post_content,
+            ]
+
         return WriterAgentOutput(
-            post_content=generated_content,
+            post_content=post_content,
+            variations=variations,
             call_to_action=self._generate_cta(input_data),
         )
 

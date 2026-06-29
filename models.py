@@ -92,10 +92,12 @@ class WriterAgentOutput(BaseModel):
         ...,
         description="The generated social media post body.",
     )
+    variations: list[str] = Field(default_factory=list)
     call_to_action: str = Field(
         ...,
         description="Suggested call-to-action for the post.",
     )
+    
 
 
 class SafetyAgentInput(BaseModel):

@@ -395,72 +395,62 @@ rewrite the content before returning it.
 The final answer should satisfy every requirement above.
 
 =========================
+CONTENT VARIATIONS
+=========================
+
+Generate THREE distinct content variations.
+
+Variation A:
+Storytelling focused.
+
+Variation B:
+Educational and insight focused.
+
+Variation C:
+Engagement and discussion focused.
+
+All three versions must:
+
+• Follow the selected platform.
+• Follow the selected goal.
+• Follow the selected tone.
+• Stay focused on the user's topic.
+• Be meaningfully different from one another.
+
+Do not generate three copies of the same content.
+
+=========================
 OUTPUT FORMAT
 =========================
 
-Return ONLY the requested content.
+Return ONLY valid JSON.
 
-Do NOT explain your reasoning.
+{{
+  "version_a": "...",
+  "version_b": "...",
+  "version_c": "..."
+}}
 
-Do NOT describe what you generated.
+Requirements:
 
-Do NOT say:
+• version_a = Storytelling version
 
-"Here is your post."
+• version_b = Educational version
 
-Do NOT include notes.
+• version_c = Engagement version
 
-Return ONLY the final content.
+Return valid JSON only.
 
-Format the output according to the selected platform.
+Do not wrap JSON in markdown.
 
-For LinkedIn:
-Return:
+Do not use ```json.
 
-LINKEDIN POST
+Do not include explanations.
 
-<content>
+Do not include notes.
 
-HASHTAGS
+Do not include reasoning.
 
-<hashtags>
-
-For X:
-Return:
-
-TWEET
-
-<content>
-
-HASHTAGS
-
-<hashtags>
-
-For Instagram:
-Return:
-
-INSTAGRAM CAPTION
-
-<caption>
-
-HASHTAGS
-
-<hashtags>
-
-For YouTube:
-Return:
-
-Video Title: 
-
-Video Description: 
-
-What Viewers Will Learn:
-
-Key Takeaways:
-
-Subscribe CTA:
-
-SEO Hashtags:
 
 =========================
 CONTENT GUARDRAILS

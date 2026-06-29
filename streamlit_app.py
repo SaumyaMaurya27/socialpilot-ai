@@ -134,7 +134,28 @@ if st.button("Generate Content"):
     with st.expander("✍️ Writer Agent Output", expanded=True):
 
         st.write("### Generated Content")
-        st.write(result.writer_output.post_content)
+        tab1, tab2, tab3 = st.tabs(
+            [
+                "📖 Storytelling",
+                "📚 Educational",
+                "💬 Engagement",
+            ]
+        )
+
+        with tab1:
+            st.write(
+                result.writer_output.variations[0]
+            )
+
+        with tab2:
+            st.write(
+                result.writer_output.variations[1]
+            )
+
+        with tab3:
+            st.write(
+                result.writer_output.variations[2]
+            )
 
         st.write("### Call To Action")
         st.info(result.writer_output.call_to_action)
