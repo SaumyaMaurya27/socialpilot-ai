@@ -1,5 +1,6 @@
-import streamlit as st
 
+import streamlit as st
+from utils.content_score import calculate_content_score
 from agents.orchestrator_agent import OrchestratorAgent
 from models import OrchestratorInput
 
@@ -125,8 +126,61 @@ if st.button("Generate Content"):
                 platform=platform.lower(),
             )
         )
+        
+        # Calculate content score from the first variation
+        score = calculate_content_score(
+            result.writer_output.post_content
+        )
 
     st.success("Content Generated Successfully!")
+
+    # ==========================
+    # Content Quality Score (FIRST)
+    # ==========================
+    st.subheader("📊 Content Quality Score")
+
+    st.metric(
+        "Overall Score",
+        f"{score['overall_score']}/100"
+    )
+
+    st.success(
+        f"🏆 {score['grade']}"
+    )
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            "🎣 Hook",
+            f"{score['hook_strength']}/10"
+        )
+
+    with col2:
+        st.metric(
+            "📈 Engagement",
+            f"{score['engagement']}/10"
+        )
+
+    with col3:
+        st.metric(
+            "📚 Readability",
+            f"{score['readability']}/10"
+        )
+        
+    col4, col5 = st.columns(2)
+
+    with col4:
+        st.metric(
+            "💼 Platform Fit",
+            f"{score['platform_fit']}/10"
+        )
+
+    with col5:
+        st.metric(
+            "🎯 Goal Alignment",
+            f"{score['goal_alignment']}/10"
+        )
 
     # ==========================
     # Writer Agent (FIRST)

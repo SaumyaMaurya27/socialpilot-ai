@@ -21,7 +21,7 @@ def test_writer_agent_fallback():
     output = agent.run(input_data)
     assert output.post_content is not None
     assert "Test Topic" in output.post_content
-    assert output.variations == []
+    assert output.variations == [output.post_content, output.post_content, output.post_content]
     assert output.call_to_action == "I'd love feedback from developers."
 
 def test_writer_agent_json_parsing():
