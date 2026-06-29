@@ -1,10 +1,37 @@
+# ==========================================================
+# TEMPORARY DEVELOPMENT MODE (GEMINI DISABLED)
+#
+# Reason:
+# Gemini free-tier quota was getting exhausted (429 errors).
+#
+# To re-enable Gemini:
+#
+# 1. Uncomment:
+#    import json
+#    from prompts.trend_prompt import build_trend_prompt
+#
+# 2. Uncomment in __init__():
+#    from utils.gemini_client import GeminiClient
+#    self.gemini = GeminiClient()
+#
+# 3. Remove the "TEMPORARY DETERMINISTIC MODE" block
+#    at the beginning of run().
+#
+# 4. That will reactivate the Gemini try/except logic inside run().
+#
+# Current Mode:
+# Trend Agent  -> Deterministic
+# Writer Agent -> Gemini
+# ==========================================================
 """Trend Agent — researches hashtags, trends, and audience keywords."""
 
 from __future__ import annotations
-
+# import json # uncomment for gamini integration
 import re
-from typing import ClassVar
 
+
+from typing import ClassVar
+# from prompts.trend_prompt import build_trend_prompt # uncomment for gamini integration
 from models import TrendAgentInput, TrendAgentOutput
 
 # Short but meaningful tokens kept during topic analysis.
@@ -109,8 +136,46 @@ Return structured JSON matching the TrendAgentOutput schema."""
             model: Optional Gemini model name for future API integration.
         """
         self.model = model or self.DEFAULT_MODEL
+        # from utils.gemini_client import GeminiClient # uncomment for gamini integration
+        # self.gemini = GeminiClient() # uncomment for gamini integration
+       
 
     def run(self, input_data: TrendAgentInput) -> TrendAgentOutput:
+
+        # ==========================================
+        # TEMPORARY DETERMINISTIC MODE
+        # Re-enable Gemini later if needed.
+        # ==========================================
+
+        topic_keywords = self._extract_topic_keywords(
+            input_data.user_topic
+        )
+
+        platform = input_data.platform.lower()
+
+        hashtags = self._generate_hashtags(
+            topic_keywords,
+            platform,
+        )
+
+        trends = self._generate_trends(
+            topic_keywords,
+        )
+
+        audience_keywords = self._generate_audience_keywords(
+            topic_keywords,
+            platform,
+        )
+
+        return TrendAgentOutput(
+            hashtags=hashtags,
+            trends=trends,
+            audience_keywords=audience_keywords,
+        )
+        # ==========================================
+        # GEMINI VERSION (DISABLED FOR NOW)
+        # ==========================================
+
         """Analyze a user topic and return trend research results.
 
         Args:
@@ -119,24 +184,56 @@ Return structured JSON matching the TrendAgentOutput schema."""
         Returns:
             Hashtags, trending topics, and audience keywords derived from the topic.
         """
-        # Step 1: Analyze the user's topic by extracting meaningful keywords.
-        topic_keywords = self._extract_topic_keywords(input_data.user_topic)
-        platform = input_data.platform.lower()
+       
+        try:
 
-        # Step 2: Build exactly 5 hashtags from topic + platform context.
-        hashtags = self._generate_hashtags(topic_keywords, platform)
+            prompt = build_trend_prompt(input_data)
+            response = self.gemini.generate(prompt)
 
-        # Step 3: Build exactly 3 trending topics from topic keywords.
-        trends = self._generate_trends(topic_keywords)
+            # Strip markdown code block formatting if present
+            cleaned = response.strip()
+            if cleaned.startswith("```"):
+                import re
+                match = re.search(r"```(?:json)?\s*(.*?)\s*```", cleaned, re.DOTALL)
+                if match:
+                    cleaned = match.group(1)
+            response = cleaned
 
-        # Step 4: Build exactly 5 audience keywords from topic + platform.
-        audience_keywords = self._generate_audience_keywords(topic_keywords, platform)
+            data = json.loads(response)
+            required_keys = [
+                "hashtags",
+                "trends",
+                "audience_keywords",
+            ]
 
-        return TrendAgentOutput(
-            hashtags=hashtags,
-            trends=trends,
-            audience_keywords=audience_keywords,
-        )
+            for key in required_keys:
+                if key not in data:
+                    raise ValueError(
+                        f"Missing key in Gemini response: {key}"
+                    )
+
+            return TrendAgentOutput(
+                hashtags=data["hashtags"],
+                trends=data["trends"],
+                audience_keywords=data["audience_keywords"],
+            )
+
+        except Exception as e:
+            print(f"Gemini error: {e}")
+
+            # Fall back to existing deterministic methods
+            topic_keywords = self._extract_topic_keywords(input_data.user_topic)
+            platform = input_data.platform.lower()
+
+            hashtags = self._generate_hashtags(topic_keywords, platform)
+            trends = self._generate_trends(topic_keywords)
+            audience_keywords = self._generate_audience_keywords(topic_keywords, platform)
+
+            return TrendAgentOutput(
+                hashtags=hashtags,
+                trends=trends,
+                audience_keywords=audience_keywords,
+            )
 
     def _extract_topic_keywords(self, user_topic: str) -> list[str]:
         """Pull distinct, meaningful words from the user's topic sentence."""
